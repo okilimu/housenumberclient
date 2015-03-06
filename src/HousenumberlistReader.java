@@ -87,7 +87,9 @@ public class HousenumberlistReader {
 				tempAkthausnummer = rsqueryofficialhousenumbers.getString("hausnummer_sortierbar");
 				tempAkthausnummer = tempAkthausnummer.substring(1, HAUSNUMMERSORTIERBARLENGTH);
 
-				Housenumber newofficialhousenumber = new Housenumber(evaluation.getHousenumberlist().ishousenumberadditionCaseSentity());
+				Housenumber newofficialhousenumber = new Housenumber(
+								evaluation.getHousenumberlist().ishousenumberadditionCaseSentity(),
+								HousenumberCache.FieldsForUniqueAddress.STREET_HOUSENUMBER);
 
 				newofficialhousenumber.setStrasse(rsqueryofficialhousenumbers.getString("strasse"));
 				newofficialhousenumber.setHausnummer(rsqueryofficialhousenumbers.getString("hausnummer"));

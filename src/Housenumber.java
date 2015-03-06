@@ -30,20 +30,23 @@ public class Housenumber {
 	public enum Treffertyp {
 		OSM_ONLY, IDENTICAL, LIST_ONLY, UNSET;
 	}
+
 	
-	private boolean isHousenumberaddition_exactly;
-	private long 	id = -1L;
-	private String	strasse = "";			// only valid for new objects
-	private String	hausnummer_sortierbar = "";
-	private String	hausnummer_normalisiert = "";
-	private Treffertyp treffertyp = Treffertyp.UNSET;
-	private String	hausnummer = "";
-	private String	osm_tag = "";			// now "key"=>"value" (including " !!!) - old, up to 23.08.2013: value of osm tag building where found addr:housenumber=*
+	private boolean 	isHousenumberaddition_exactly;
+	private HousenumberCache.FieldsForUniqueAddress	fieldsForUniqueAddress = HousenumberCache.FieldsForUniqueAddress.STREET_HOUSENUMBER;
+	private long 		id = -1L;
+	private String		strasse = "";			// only valid for new objects
+	private String		postcode = "";
+	private String		hausnummer_sortierbar = "";
+	private String		hausnummer_normalisiert = "";
+	private Treffertyp 	treffertyp = Treffertyp.UNSET;
+	private String		hausnummer = "";
+	private String		osm_tag = "";			// now "key"=>"value" (including " !!!) - old, up to 23.08.2013: value of osm tag building where found addr:housenumber=*
 	private int 		osm_tag_prio = 9999;
-	private String	osm_objektart = "";		// "way", "node" or "relation"
+	private String		osm_objektart = "";		// "way", "node" or "relation"
 	private long		osm_id = -1L;
-	private String  lonlat = "";
-	private String	lonlat_source = "";
+	private String  	lonlat = "";
+	private String		lonlat_source = "";
 
 	private String	state = ""; // ""=not set; "untouched"=got from database, without updates; "updated"=updated, "deleted!; "added"=real new entry
 
@@ -63,8 +66,9 @@ public class Housenumber {
 	}
 		
 
-	public Housenumber(boolean isHousenumberaddition_exactly)  {
+	public Housenumber(boolean isHousenumberaddition_exactly, HousenumberCache.FieldsForUniqueAddress fieldsForUniqueAddress)  {
 		this.isHousenumberaddition_exactly = isHousenumberaddition_exactly;
+		this.fieldsForUniqueAddress = fieldsForUniqueAddress;
 	}
 	
 		/**
@@ -73,7 +77,15 @@ public class Housenumber {
 		 */
 //TODO in municipalities, where streetname and housenumber are not unique, one more value must be added, for example postcode
 	public String getListKey() {
-		return this.getStrasse().toLowerCase() + this.getHausnummerSortierbar().toLowerCase();
+		String listkey = "";
+
+		if(this.fieldsForUniqueAddress.compareTo(HousenumberCache.FieldsForUniqueAddress.STREET_HOUSENUMBER) == 0)
+			listkey = this.getStrasse().toLowerCase() + this.getHausnummerSortierbar().toLowerCase();
+		else if(this.fieldsForUniqueAddress.compareTo(HousenumberCache.FieldsForUniqueAddress.STREET_POSTCODE_HOUSENUMBER) == 0)
+			listkey = this.getStrasse().toLowerCase()  + this.getPostcode().toLowerCase() + this.getHausnummerSortierbar().toLowerCase();
+		else if(this.fieldsForUniqueAddress.compareTo(HousenumberCache.FieldsForUniqueAddress.POSTCODE_HOUSENUMBER) == 0)
+			listkey = this.getPostcode().toLowerCase() + this.getHausnummerSortierbar().toLowerCase();
+		return listkey;
 	}
 
 
@@ -110,6 +122,7 @@ public class Housenumber {
 				
 		this.id = entry.id;
 		this.strasse = entry.strasse;
+		this.postcode = entry.postcode;
 		this.hausnummer_sortierbar = entry.hausnummer_sortierbar;
 		this.setTreffertyp(entry.treffertyp);
 		setHausnummer(entry.hausnummer);
@@ -129,6 +142,7 @@ public class Housenumber {
 		if(this != null) {
 			entryastext = "Id: "+ this.id + 
 				"\tStrasse: " + this.strasse +
+				"\tPostcode: " + this.postcode + 
 				"\tHnr: " + this.hausnummer +
 				"\tTreffertyp: " + this.getTreffertypText() +
 				"\tOSM-Tag: " + this.osm_tag +
@@ -146,6 +160,7 @@ public class Housenumber {
 		if(this != null) {
 			entryastext = "Id: "+ this.id + 
 				"\tStrasse: " + this.strasse +
+				"\tPostcode: " + this.postcode + 
 				"\tHnr: " + this.hausnummer +
 				"\tHnr_sortiert: " + this.hausnummer_sortierbar + 
 				"\tTreffertyp: " + this.getTreffertypText() +
@@ -541,6 +556,13 @@ public class Housenumber {
 	}
 
 	/**
+	 * @return the postcode
+	 */
+	public String getPostcode() {
+		return postcode;
+	}
+
+	/**
 	 * @param id the id to set
 	 */
 	public void setId(Long id) {
@@ -629,6 +651,12 @@ public class Housenumber {
 		this.strasse = strasse;
 	}
 
+	/**
+	 * @param postcode the postcode to set
+	 */
+	public void setPostcode(String postcode) {
+		this.postcode = postcode;
+	}
 	
 
 

@@ -32,11 +32,18 @@ import java.util.TreeMap;
 
 
 
+
 public class HousenumberCache {
+
+	public enum FieldsForUniqueAddress {
+		STREET_HOUSENUMBER, POSTCODE_HOUSENUMBER, STREET_POSTCODE_HOUSENUMBER;
+	}
+
 	TreeMap<String,Housenumber> cache = new TreeMap<String,Housenumber>(); 
 	public boolean debug = false;
 	public int cache_count = 0;
 	private boolean housenumberadditionCaseSentity = true;
+	private FieldsForUniqueAddress	fieldsForUniqueAddress = FieldsForUniqueAddress.STREET_HOUSENUMBER;
 	String land = "";
 	String stadt = "";
 	String jobname = "";
@@ -69,11 +76,26 @@ public class HousenumberCache {
 	}
 
 	/**
+	 * @return the housenumberadditionCaseSentity
+	 */
+	public FieldsForUniqueAddress getFieldsForUniqueAddress() {
+		return fieldsForUniqueAddress;
+	}
+
+	/**
 	 * @param housenumberadditionCaseSentity the housenumberadditionCaseSentity to set
 	 */
 	public void setHousenumberadditionCaseSentity(boolean housenumberadditionCaseSentity) {
 		this.housenumberadditionCaseSentity = housenumberadditionCaseSentity;
 	}
+	
+	/**
+	 * @param housenumberadditionCaseSentity the housenumberadditionCaseSentity to set
+	 */
+	public void setFieldsForUniqueAddress(FieldsForUniqueAddress fieldsForUniqueAddress) {
+		this.fieldsForUniqueAddress = fieldsForUniqueAddress;
+	}
+	
 
 	public int length() {
 		return cache_count;
@@ -109,7 +131,7 @@ public class HousenumberCache {
 
 	// set an entry, which is from database table, so not a real new entry
 	public Housenumber add_dbentry(Housenumber entry) {
-		Housenumber newentry = new Housenumber(this.ishousenumberadditionCaseSentity());
+		Housenumber newentry = new Housenumber(this.ishousenumberadditionCaseSentity(), this.getFieldsForUniqueAddress());
 		newentry.set(entry);
 		newentry.setstate("dbloaded");
 		newentry.toStringlong();
@@ -120,7 +142,7 @@ public class HousenumberCache {
 
 		// add a real new entry
 	public void add_newentry( Housenumber in_newentry) {
-		Housenumber newentry = new Housenumber(this.ishousenumberadditionCaseSentity());
+		Housenumber newentry = new Housenumber(this.ishousenumberadditionCaseSentity(), this.getFieldsForUniqueAddress());
 		newentry.set(in_newentry);
 		newentry.setstate("new");
 		newentry.toStringlong();
@@ -173,7 +195,7 @@ public class HousenumberCache {
 		else
 			return null;
 	}
-	
+
 
 	public HousenumberCache merge(HousenumberCache osmhousenumbers) {
 		HousenumberCache mergedhousenumbers = new HousenumberCache();
